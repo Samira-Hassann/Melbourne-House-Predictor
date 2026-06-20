@@ -3,249 +3,109 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# ==========================================
-# Page Config
-# ==========================================
-st.set_page_config(
-    page_title="Melbourne House Price Predictor",
-    page_icon="🏡",
-    layout="wide"
-)
+st.set_page_config(page_title="Melbourne House Price Predictor", page_icon="🏡", layout="wide")
 
-# ==========================================
-# Load Model
-# ==========================================
+
 model = joblib.load("catboost_house_price_pipeline.pkl")
 
-# ==========================================
-# Lists
-# ==========================================
-
 suburb_list = [
-    # الصقي هنا قائمة الأحياء كاملة
-    "Abbotsford",
-    "Aberfeldie",
-    "Airport West",
-    "Albanvale",
-    "Albert Park",
-    # .....
-    "Yarra Glen",
-    "Yarraville"
+    'Abbotsford','Aberfeldie','Airport West','Albanvale','Albert Park','Albion','Alphington',
+    'Altona','Altona Meadows','Altona North','Ardeer','Armadale','Ascot Vale','Ashburton',
+    'Ashwood','Aspendale','Aspendale Gardens','Attwood','Avondale Heights','Bacchus Marsh',
+    'Balaclava','Balwyn','Balwyn North','Bayswater','Bayswater North','Beaconsfield',
+    'Beaconsfield Upper','Beaumaris','Bellfield','Bentleigh','Bentleigh East','Berwick',
+    'Black Rock','Blackburn','Blackburn North','Blackburn South','Bonbeach','Boronia',
+    'Box Hill','Braybrook','Briar Hill','Brighton','Brighton East','Broadmeadows','Brookfield',
+    'Brooklyn','Brunswick','Brunswick East','Brunswick West','Bulleen','Bullengarook',
+    'Bundoora','Burnley','Burnside','Burnside Heights','Burwood','Burwood East','Cairnlea',
+    'Camberwell','Campbellfield','Canterbury','Carlton','Carlton North','Carnegie',
+    'Caroline Springs','Carrum','Carrum Downs','Caulfield','Caulfield East','Caulfield North',
+    'Caulfield South','Chadstone','Chelsea','Cheltenham','Clayton','Clayton South',
+    'Clifton Hill','Coburg','Coburg North','Collingwood','Craigieburn','Cranbourne',
+    'Cremorne','Croydon','Dandenong','Dandenong North','Docklands','Doncaster','Doncaster East',
+    'Donvale','Doreen','Epping','Essendon','Fitzroy','Footscray','Frankston','Glen Iris',
+    'Glen Waverley','Glenroy','Greensborough','Hampton','Hawthorn','Heidelberg','Highett',
+    'Hoppers Crossing','Ivanhoe','Kew','Kingsbury','Knoxfield','Lalor','Malvern',
+    'Maribyrnong','Melbourne','Melton','Mentone','Mill Park','Mitcham','Moonee Ponds',
+    'Moorabbin','Mount Waverley','Narre Warren','Newport','Northcote','Oakleigh','Ormond',
+    'Pakenham','Point Cook','Prahran','Preston','Richmond','Ringwood','Rowville','Sandringham',
+    'South Yarra','Southbank','Springvale','St Kilda','Sunbury','Sunshine','Tarneit',
+    'Thornbury','Toorak','Truganina','Werribee','Wheelers Hill','Williamstown','Windsor',
+    'Wyndham Vale','Yarraville'
 ]
 
 council_list = [
-    'Yarra',
-    'Moonee Valley',
-    'Port Phillip',
-    'Darebin',
-    'Hobsons Bay',
-    'Stonnington',
-    'Boroondara',
-    'Monash',
-    'Glen Eira',
-    'Whitehorse',
-    'Maribyrnong',
-    'Bayside',
-    'Moreland',
-    'Manningham',
-    'Banyule',
-    'Melbourne',
-    'Kingston',
-    'Brimbank',
-    'Hume',
-    'Knox',
-    'Maroondah',
-    'Casey',
-    'Melton',
-    'Greater Dandenong',
-    'Nillumbik',
-    'Whittlesea',
-    'Frankston',
-    'Macedon Ranges',
-    'Yarra Ranges',
-    'Wyndham',
-    'Cardinia',
-    'Moorabool'
+    'Banyule','Bayside','Boroondara','Brimbank','Cardinia','Casey','Darebin',
+    'Frankston','Glen Eira','Greater Dandenong','Hobsons Bay','Hume','Kingston',
+    'Knox','Macedon Ranges','Manningham','Maribyrnong','Maroondah','Melbourne',
+    'Melton','Monash','Moonee Valley','Moorabool','Moreland','Nillumbik',
+    'Port Phillip','Stonnington','Whitehorse','Whittlesea','Wyndham','Yarra',
+    'Yarra Ranges','Unavailable'
 ]
 
 region_list = [
-    'Eastern Metropolitan',
-    'Eastern Victoria',
-    'Northern Metropolitan',
-    'Northern Victoria',
-    'South-Eastern Metropolitan',
-    'Southern Metropolitan',
-    'Western Metropolitan',
-    'Western Victoria'
+    'Eastern Metropolitan','Eastern Victoria','Northern Metropolitan','Northern Victoria',
+    'South-Eastern Metropolitan','Southern Metropolitan','Western Metropolitan','Western Victoria'
 ]
 
-# ==========================================
-# Mappings
-# ==========================================
 
-type_map = {
-    "🏠 House": "h",
-    "🏢 Unit": "u",
-    "🏘️ Townhouse": "t"
-}
+type_map = {"🏠 House":"h","🏢 Unit":"u","🏘️ Townhouse":"t"}
+method_map = {"🤝 Sold":"S","📑 Sold Prior":"SP","💼 Private Sale":"PI","🔨 Auction":"SA"}
 
-method_map = {
-    "🤝 Sold": "S",
-    "📑 Sold Prior": "SP",
-    "💼 Private Sale": "PI",
-    "🔨 Vendor Bid": "VB",
-    "🏆 Auction": "SA"
-}
-
-# ==========================================
-# Header
-# ==========================================
 
 st.title("🏡 Melbourne House Price Predictor")
-st.markdown(
-    "Predict Melbourne property prices using the final tuned CatBoost model 🤖"
-)
 
-# ==========================================
-# Form
-# ==========================================
-
-with st.form("prediction_form"):
+with st.form("form"):
 
     col1, col2 = st.columns(2)
 
-    # ------------------
-    # Location
-    # ------------------
     with col1:
+        st.subheader("📍 Location")
 
-        st.subheader("📍 Location Information")
+        suburb = st.selectbox("🏘️ Suburb", suburb_list, index=None)
+        council = st.selectbox("🏛️ Council Area", council_list)
+        region = st.selectbox("🌏 Region", region_list)
 
-        Suburb = st.selectbox(
-            "🏘️ Suburb",
-            options=sorted(suburb_list),
-            index=None,
-            placeholder="🔍 Search suburb..."
-        )
+        lat = st.number_input("📌 Latitude", value=-37.81)
+        lon = st.number_input("📌 Longitude", value=144.96)
 
-        CouncilArea = st.selectbox(
-            "🏛️ Council Area",
-            options=sorted(council_list)
-        )
-
-        Regionname = st.selectbox(
-            "🌏 Region",
-            options=region_list
-        )
-
-        Lattitude = st.number_input(
-            "📌 Latitude",
-            value=-37.8136,
-            format="%.6f"
-        )
-
-        Longtitude = st.number_input(
-            "📌 Longitude",
-            value=144.9631,
-            format="%.6f"
-        )
-
-    # ------------------
-    # Property Details
-    # ------------------
     with col2:
+        st.subheader("🏠 Property")
 
-        st.subheader("🏠 Property Details")
+        rooms = st.number_input("🛏️ Rooms", 1, 10, 3)
+        bath = st.number_input("🛁 Bathrooms", 1, 10, 2)
+        car = st.number_input("🚗 Cars", 0, 5, 1)
+        dist = st.number_input("📏 Distance", 0.0, 50.0, 10.0)
+        prop_count = st.number_input("🏘️ Property Count", 0, 20000, 5000)
+        land = st.number_input("🌳 Land Size", 0.0, 5000.0, 500.0)
 
-        Rooms = st.number_input(
-            "🛏️ Rooms",
-            min_value=1,
-            value=3
-        )
+    st.subheader("💼 Sale Info")
 
-        Bathroom = st.number_input(
-            "🛁 Bathrooms",
-            min_value=1,
-            value=2
-        )
+    typ = st.selectbox("🏠 Type", list(type_map.keys()))
+    method = st.selectbox("🤝 Method", list(method_map.keys()))
 
-        Car = st.number_input(
-            "🚗 Car Spaces",
-            min_value=0,
-            value=1
-        )
+    submit = st.form_submit_button("🚀 Predict")
 
-        Distance = st.number_input(
-            "📏 Distance from CBD (KM)",
-            min_value=0.0,
-            value=10.0
-        )
-
-        Propertycount = st.number_input(
-            "🏘️ Property Count",
-            min_value=0,
-            value=5000
-        )
-
-        LogLandsize = st.number_input(
-            "🌳 Log Land Size",
-            min_value=0.0,
-            value=5.0
-        )
-
-    st.divider()
-
-    st.subheader("💼 Sale Information")
-
-    Type_display = st.selectbox(
-        "🏠 Property Type",
-        options=list(type_map.keys())
-    )
-
-    Method_display = st.selectbox(
-        "🤝 Sale Method",
-        options=list(method_map.keys())
-    )
-
-    predict_btn = st.form_submit_button("🚀 Predict Price")
-
-# ==========================================
-# Prediction
-# ==========================================
-
-if predict_btn:
+if submit:
 
     input_df = pd.DataFrame([{
-        "Suburb": Suburb,
-        "Rooms": Rooms,
-        "Type": type_map[Type_display],
-        "Method": method_map[Method_display],
-        "Distance": Distance,
-        "Bathroom": Bathroom,
-        "Car": Car,
-        "CouncilArea": CouncilArea,
-        "Lattitude": Lattitude,
-        "Longtitude": Longtitude,
-        "Regionname": Regionname,
-        "Propertycount": Propertycount,
-        "LogLandsize": LogLandsize
+        "Suburb": suburb,
+        "Rooms": rooms,
+        "Type": type_map[typ],
+        "Method": method_map[method],
+        "Distance": dist,
+        "Bathroom": bath,
+        "Car": car,
+        "CouncilArea": council,
+        "Lattitude": lat,
+        "Longtitude": lon,
+        "Regionname": region,
+        "Propertycount": prop_count,
+        "LogLandsize": np.log1p(land)
     }])
 
-    try:
+    pred_log = model.predict(input_df)
+    price = np.expm1(pred_log)[0]
 
-        prediction_log = model.predict(input_df)
-        prediction_price = np.expm1(prediction_log)[0]
-
-        st.success("✅ Prediction Generated Successfully")
-
-        st.metric(
-            label="💰 Estimated House Price",
-            value=f"AUD {prediction_price:,.0f}"
-        )
-
-        st.info(
-            "🤖 This prediction was generated using the final tuned CatBoost model."
-        )
-
-    except Exception as e:
-        st.error(f"❌ Error: {e}")
+    st.success("✅ Prediction Done")
+    st.metric("💰 Estimated Price", f"AUD {price:,.0f}")
