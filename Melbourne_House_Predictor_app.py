@@ -18,29 +18,65 @@ st.set_page_config(
 model = joblib.load("catboost_house_price_pipeline.pkl")
 
 # ==========================================
-# Dropdown Lists
-# (استبدليها بالقيم الحقيقية من الداتا)
+# Lists
 # ==========================================
 
 suburb_list = [
-    "Richmond",
-    "Brunswick",
-    "St Kilda",
-    "Footscray"
+    # الصقي هنا قائمة الأحياء كاملة
+    "Abbotsford",
+    "Aberfeldie",
+    "Airport West",
+    "Albanvale",
+    "Albert Park",
+    # .....
+    "Yarra Glen",
+    "Yarraville"
 ]
 
 council_list = [
-    "Yarra",
-    "Moreland",
-    "Boroondara",
-    "Melbourne"
+    'Yarra',
+    'Moonee Valley',
+    'Port Phillip',
+    'Darebin',
+    'Hobsons Bay',
+    'Stonnington',
+    'Boroondara',
+    'Monash',
+    'Glen Eira',
+    'Whitehorse',
+    'Maribyrnong',
+    'Bayside',
+    'Moreland',
+    'Manningham',
+    'Banyule',
+    'Melbourne',
+    'Kingston',
+    'Brimbank',
+    'Hume',
+    'Knox',
+    'Maroondah',
+    'Casey',
+    'Melton',
+    'Greater Dandenong',
+    'Nillumbik',
+    'Whittlesea',
+    'Frankston',
+    'Macedon Ranges',
+    'Yarra Ranges',
+    'Wyndham',
+    'Cardinia',
+    'Moorabool'
 ]
 
 region_list = [
-    "Northern Metropolitan",
-    "Southern Metropolitan",
-    "Western Metropolitan",
-    "Eastern Metropolitan"
+    'Eastern Metropolitan',
+    'Eastern Victoria',
+    'Northern Metropolitan',
+    'Northern Victoria',
+    'South-Eastern Metropolitan',
+    'Southern Metropolitan',
+    'Western Metropolitan',
+    'Western Victoria'
 ]
 
 # ==========================================
@@ -66,12 +102,9 @@ method_map = {
 # ==========================================
 
 st.title("🏡 Melbourne House Price Predictor")
-
-st.markdown("""
-Predict Melbourne property prices using a tuned **CatBoost Machine Learning Model** 🤖
-
-Fill in the property details below and click **Predict Price**.
-""")
+st.markdown(
+    "Predict Melbourne property prices using the final tuned CatBoost model 🤖"
+)
 
 # ==========================================
 # Form
@@ -81,43 +114,45 @@ with st.form("prediction_form"):
 
     col1, col2 = st.columns(2)
 
-    # =====================
+    # ------------------
     # Location
-    # =====================
-
+    # ------------------
     with col1:
 
         st.subheader("📍 Location Information")
 
         Suburb = st.selectbox(
             "🏘️ Suburb",
-            suburb_list
+            options=sorted(suburb_list),
+            index=None,
+            placeholder="🔍 Search suburb..."
         )
 
         CouncilArea = st.selectbox(
             "🏛️ Council Area",
-            council_list
+            options=sorted(council_list)
         )
 
         Regionname = st.selectbox(
             "🌏 Region",
-            region_list
+            options=region_list
         )
 
         Lattitude = st.number_input(
             "📌 Latitude",
+            value=-37.8136,
             format="%.6f"
         )
 
         Longtitude = st.number_input(
             "📌 Longitude",
+            value=144.9631,
             format="%.6f"
         )
 
-    # =====================
-    # Property
-    # =====================
-
+    # ------------------
+    # Property Details
+    # ------------------
     with col2:
 
         st.subheader("🏠 Property Details")
@@ -131,7 +166,7 @@ with st.form("prediction_form"):
         Bathroom = st.number_input(
             "🛁 Bathrooms",
             min_value=1,
-            value=1
+            value=2
         )
 
         Car = st.number_input(
@@ -141,7 +176,7 @@ with st.form("prediction_form"):
         )
 
         Distance = st.number_input(
-            "📏 Distance From CBD (KM)",
+            "📏 Distance from CBD (KM)",
             min_value=0.0,
             value=10.0
         )
@@ -155,27 +190,24 @@ with st.form("prediction_form"):
         LogLandsize = st.number_input(
             "🌳 Log Land Size",
             min_value=0.0,
-            value=5.0,
-            help="Use the log-transformed land size value"
+            value=5.0
         )
 
-    st.markdown("---")
+    st.divider()
 
     st.subheader("💼 Sale Information")
 
     Type_display = st.selectbox(
-        "🏡 Property Type",
-        list(type_map.keys())
+        "🏠 Property Type",
+        options=list(type_map.keys())
     )
 
     Method_display = st.selectbox(
         "🤝 Sale Method",
-        list(method_map.keys())
+        options=list(method_map.keys())
     )
 
-    predict_btn = st.form_submit_button(
-        "🚀 Predict Price"
-    )
+    predict_btn = st.form_submit_button("🚀 Predict Price")
 
 # ==========================================
 # Prediction
@@ -201,23 +233,19 @@ if predict_btn:
 
     try:
 
-        log_prediction = model.predict(input_df)
-
-        predicted_price = np.expm1(log_prediction)[0]
+        prediction_log = model.predict(input_df)
+        prediction_price = np.expm1(prediction_log)[0]
 
         st.success("✅ Prediction Generated Successfully")
 
         st.metric(
             label="💰 Estimated House Price",
-            value=f"AUD {predicted_price:,.0f}"
+            value=f"AUD {prediction_price:,.0f}"
         )
 
-        st.balloons()
-
         st.info(
-            "🤖 Prediction generated using the final tuned CatBoost model."
+            "🤖 This prediction was generated using the final tuned CatBoost model."
         )
 
     except Exception as e:
-
         st.error(f"❌ Error: {e}")
