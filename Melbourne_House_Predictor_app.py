@@ -1,3 +1,35 @@
+class MedianTargetEncoder(BaseEstimator, TransformerMixin):
+    def __init__(self, m=10):
+        self.m = m
+        self.mapping = None
+        self.global_median = None
+
+    def fit(self, X, y):
+        X = pd.DataFrame(X).copy()
+
+        y = y.values if hasattr(y, 'values') else y
+
+        X['target'] = y
+
+        self.global_median = X['target'].median()
+
+        col = X.columns[0]
+
+        counts = X.groupby(col)['target'].count()
+        medians = X.groupby(col)['target'].median()
+
+        self.mapping = (counts * medians + self.m * self.global_median) / (counts + self.m)
+
+        return self
+
+    def transform(self, X):
+        X = pd.DataFrame(X).copy()
+        col = X.columns[0]
+
+        encoded = X[col].map(self.mapping)
+
+        return encoded.fillna(self.global_median).to_frame()
+
 import streamlit as st
 import pandas as pd
 import numpy as np
