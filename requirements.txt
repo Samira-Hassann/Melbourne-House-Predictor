@@ -1,7 +1,4 @@
 streamlit>=1.49.0
 pandas>=2.3.0
-pillow>=11.3.0
 numpy>=2.3.0
-scikit-learn>=1.7.0
-catboost>=1.2.8
 joblib>=1.5.0
