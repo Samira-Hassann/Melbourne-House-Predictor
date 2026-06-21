@@ -1,3 +1,4 @@
+from sklearn.base import BaseEstimator, TransformerMixin
 class MedianTargetEncoder(BaseEstimator, TransformerMixin):
     def __init__(self, m=10):
         self.m = m
